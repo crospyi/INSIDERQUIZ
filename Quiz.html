@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electrical Engineering Diploma Quiz</title>
+    <style>
+        :root {
+            --primary-color: #004085;
+            --secondary-color: #f8f9fa;
+            --accent-color: #28a745;
+            --error-color: #dc3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .quiz-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary-color);
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+
+        h1 { color: var(--primary-color); margin-bottom: 5px; }
+        p.sub-title { font-style: italic; color: #666; }
+
+        /* User Info Section */
+        .user-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: var(--secondary-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .input-group { display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 5px; color: var(--primary-color); }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        /* Question Styling */
+        .question-card {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-left: 5px solid var(--primary-color);
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .option {
+            background: #f1f3f5;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover { background: #dee2e6; }
+        .option input { margin-right: 15px; transform: scale(1.2); }
+
+        /* Submit Button */
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        #submit-btn:hover { background: #002752; }
+
+        /* Results Display */
+        #result-area {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            padding: 30px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .user-info, .options-grid { grid-template-columns: 1fr; }
+            .quiz-container { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <header>
+        <h1>Electrical Engineering Diploma Quiz</h1>
+        <p class="sub-title">Total Questions: 50 | Points: 1 per question</p>
+    </header>
+
+    <div class="user-info">
+        <div class="input-group">
+            <label for="student-name">Full Name *</label>
+            <input type="text" id="student-name" placeholder="Enter your name" required>
+        </div>
+        <div class="input-group">
+            <label for="campus-name">Campus Name *</label>
+            <input type="text" id="campus-name" placeholder="Enter college name" required>
+        </div>
+        <div class="input-group" style="grid-column: span 2;">
+            <label for="branch">Branch *</label>
+            <select id="branch">
+                <option value="Electrical Engineering">Electrical Engineering</option>
+            </select>
+        </div>
+    </div>
+
+    <form id="quizForm">
+        <div id="questions-container">
+            </div>
+
+        <button type="button" id="submit-btn" onclick="calculateScore()">Submit Quiz</button>
+    </form>
+
+    <div id="result-area">
+        <h2 id="score-text"></h2>
+        <p id="user-details"></p>
+        <button onclick="location.reload()" style="padding: 10px; cursor: pointer;">Retake Quiz</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "The SI unit of electric current is?", a: ["Volt", "Ampere", "Ohm", "Watt"], c: 1 },
+        { q: "Ohm's Law is not applicable to?", a: ["Resistors", "Inductors", "Semiconductors", "Capacitors"], c: 2 },
+        { q: "The power factor of a purely resistive circuit is?", a: ["Zero", "0.5 lagging", "Unity", "0.8 leading"], c: 2 },
+        { q: "Kirchhoff's Current Law (KCL) is based on the conservation of?", a: ["Energy", "Momentum", "Charge", "Mass"], c: 2 },
+        { q: "The frequency of DC supply is?", a: ["50 Hz", "60 Hz", "0 Hz", "100 Hz"], c: 2 },
+        { q: "Which material is used as a core in a transformer?", a: ["Copper", "Aluminum", "Silicon Steel", "Brass"], c: 2 },
+        { q: "A transformer works on the principle of?", a: ["Self Induction", "Mutual Induction", "Static Electricity", "Dynamic Induction"], c: 1 },
+        { q: "The unit of Inductance is?", a: ["Farad", "Henry", "Weber", "Tesla"], c: 1 },
+        { q: "Form Factor is the ratio of?", a: ["RMS/Avg", "Avg/RMS", "Peak/RMS", "RMS/Peak"], c: 0 },
+        { q: "In a lead-acid battery, the electrolyte used is?", a: ["HCl", "HNO3", "H2SO4", "KOH"], c: 2 },
+        { q: "A Megger is used to measure?", a: ["Low Resistance", "Voltage", "Insulation Resistance", "Current"], c: 2 },
+        { q: "The unit of Luminous Flux is?", a: ["Candela", "Lux", "Lumen", "Steradian"], c: 2 },
+        { q: "Synchronous speed of an induction motor is given by?", a: ["120f/P", "120P/f", "fP/120", "120/fP"], c: 0 },
+        { q: "The motor used in household refrigerators is?", a: ["DC Series Motor", "3-phase Induction Motor", "1-phase Induction Motor", "Synchronous Motor"], c: 2 },
+        { q: "The device used to convert AC to DC is?", a: ["Inverter", "Rectifier", "Transformer", "Chopper"], c: 1 },
+        { q: "The function of a breather in a transformer is?", a: ["To provide oxygen", "To cool the oil", "To filter moisture from air", "To increase pressure"], c: 2 },
+        { q: "Buchholz relay is used for the protection of?", a: ["Generators", "Motors", "Transformers", "Transmission lines"], c: 2 },
+        { q: "Which of the following is a renewable source of energy?", a: ["Coal", "Natural Gas", "Solar", "Nuclear"], c: 2 },
+        { q: "The back EMF of a DC motor depends on?", a: ["Speed", "Flux", "Number of conductors", "All of the above"], c: 3 },
+        { q: "The speed of a DC shunt motor can be controlled by?", a: ["Flux control", "Armature control", "Voltage control", "All of the above"], c: 3 },
+        { q: "What is the unit of Capacitance?", a: ["Ohm", "Henry", "Farad", "Coulomb"], c: 2 },
+        { q: "A semiconductor has ___ temperature coefficient of resistance?", a: ["Positive", "Negative", "Zero", "Infinite"], c: 1 },
+        { q: "Which of the following is an active element?", a: ["Resistor", "Inductor", "Transistor", "Capacitor"], c: 2 },
+        { q: "The color of the neutral wire in a 3-core flexible cable is?", a: ["Red", "Blue", "Green", "Brown"], c: 1 },
+        { q: "Fuses are used to protect the circuit against?", a: ["Overvoltage", "Overload/Short circuit", "Open circuit", "Under voltage"], c: 1 },
+        { q: "Thermal power plants work on which cycle?", a: ["Carnot", "Rankine", "Otto", "Diesel"], c: 1 },
+        { q: "A 4-pole 50Hz machine runs at a synchronous speed of?", a: ["3000 rpm", "1500 rpm", "1000 rpm", "750 rpm"], c: 1 },
+        { q: "The armature of a DC machine is made of?", a: ["Solid Steel", "Laminated Silicon Steel", "Copper", "Cast Iron"], c: 1 },
+        { q: "The power factor of an AC circuit is given by?", a: ["R/Z", "Z/R", "X/R", "R/X"], c: 0 },
+        { q: "The unit of Magnetic Flux is?", a: ["Tesla", "Weber", "Ampere-turns", "Maxwell"], c: 1 },
+        { q: "Which instrument measures electrical energy?", a: ["Wattmeter", "Voltmeter", "Energy meter", "Ammeter"], c: 2 },
+        { q: "A step-up transformer increases?", a: ["Current", "Power", "Voltage", "Frequency"], c: 2 },
+        { q: "The torque developed by a DC motor is proportional to?", a: ["Flux", "Armature Current", "Both A and B", "None"], c: 2 },
+        { q: "In a series circuit, which parameter remains constant?", a: ["Voltage", "Current", "Resistance", "Power"], c: 1 },
+        { q: "Which loss in a transformer varies with load?", a: ["Core loss", "Hysteresis loss", "Copper loss", "Eddy current loss"], c: 2 },
+        { q: "The secondary of a current transformer (CT) should never be?", a: ["Short circuited", "Open circuited", "Grounded", "Loaded"], c: 1 },
+        { q: "The most common material for overhead transmission lines is?", a: ["Copper", "Steel", "ACSR", "Aluminum"], c: 2 },
+        { q: "Skin effect depends on?", a: ["Frequency", "Conductor diameter", "Permeability", "All of the above"], c: 3 },
+        { q: "The voltage used for primary transmission in India is?", a: ["11 kV", "33 kV", "132 kV", "400 V"], c: 2 },
+        { q: "Resistance of an ideal ammeter is?", a: ["Zero", "Infinite", "100 Ohm", "1 Ohm"], c: 0 },
+        { q: "Resistance of an ideal voltmeter is?", a: ["Zero", "Infinite", "100 Ohm", "1 Ohm"], c: 1 },
+        { q: "Binary equivalent of decimal 5 is?", a: ["101", "110", "111", "011"], c: 0 },
+        { q: "Which gate is called a Universal Gate?", a: ["AND", "OR", "NAND", "NOT"], c: 2 },
+        { q: "The boiling point of transformer oil should be?", a: ["Low", "High", "Medium", "Zero"], c: 1 },
+        { q: "DC series motors are used for?", a: ["Lathe machines", "Fans", "Traction/Cranes", "Water pumps"], c: 2 },
+        { q: "The dummy coils in DC machines are used to?", a: ["Increase EMF", "Improve commutation", "Maintain mechanical balance", "Reduce losses"], c: 2 },
+        { q: "Diversity factor is always?", a: ["Less than 1", "Equal to 1", "Greater than 1", "Zero"], c: 2 },
+        { q: "The material used for fuse wire should have?", a: ["High melting point", "Low melting point", "High resistance", "None"], c: 1 },
+        { q: "Electric pressure is another name for?", a: ["Current", "Voltage", "Resistance", "Power"], c: 1 },
+        { q: "The current in an AC circuit is lagging the voltage by 90 degrees. The circuit is?", a: ["Purely Resistive", "Purely Capacitive", "Purely Inductive", "RL Series"], c: 2 }
+    ];
+
+    function loadQuestions() {
+        const container = document.getElementById('questions-container');
+        questions.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `
+                <div class="question-text">${index + 1}. ${item.q}</div>
+                <div class="options-grid">
+                    ${item.a.map((opt, i) => `
+                        <label class="option">
+                            <input type="radio" name="q${index}" value="${i}">
+                            ${opt}
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function calculateScore() {
+        const name = document.getElementById('student-name').value;
+        const campus = document.getElementById('campus-name').value;
+
+        if (!name || !campus) {
+            alert("Please fill in your Name and Campus Name before submitting.");
+            return;
+        }
+
+        let score = 0;
+        questions.forEach((item, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (selected && parseInt(selected.value) === item.c) {
+                score++;
+            }
+        });
+
+        document.getElementById('quizForm').style.display = 'none';
+        document.querySelector('.user-info').style.display = 'none';
+        document.querySelector('header').style.display = 'none';
+        
+        const resultArea = document.getElementById('result-area');
+        resultArea.style.display = 'block';
+        document.getElementById('score-text').innerText = `You scored ${score} out of 50!`;
+        document.getElementById('user-details').innerHTML = `
+            <strong>Name:</strong> ${name}<br>
+            <strong>Campus:</strong> ${campus}<br>
+            <strong>Branch:</strong> Electrical Engineering
+        `;
+        window.scrollTo(0,0);
+    }
+
+    window.onload = loadQuestions;
+</script>
+
+</body>
+</html>
